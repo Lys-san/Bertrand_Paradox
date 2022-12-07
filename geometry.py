@@ -82,7 +82,7 @@ class Triangle:
                 + self.c.__str__()
 
 
-    def draw(self):
+    def draw(self, color = "grey77"):
         """
         Graphic display of the current Triangle.
         Returns the object identifier.
@@ -91,7 +91,14 @@ class Triangle:
                      (self.b.x, self.b.y), \
                      (self.c.x, self.c.y)]
 
-        return polygone(pointList);
+        return polygone(pointList, color);
+
+    def sideLen(self):
+        """
+        Considering that all sides have same lengths.
+        Returns the length of the ab vertex.
+        """
+        return Line(self.a, self.b).length()
 
 class Circle:
     """
@@ -167,13 +174,13 @@ class Circle:
         If no start point is given, it will be randomly generated.
         """
         a = startPoint if startPoint else self.randomPointFromPerimeter() #ref point
-        # symetric
-        tmp = a.symetric(self.center)
+        tmp = a.symetric(self.center) # creating ref point symetric
 
         # cet algo fait le taff mais est horrible (la complexité ahhhh, plus de
         # 5 secondes avant d'avoir le résultat)
         # A REVOIR PLUS TARD
 
+        # creating a random point and hoping that it's the edge from the triangle
         b = self.randomPointFromPerimeter()
         while(round(Line(tmp, b).length()) != self.radius):
             b = self.randomPointFromPerimeter()
@@ -227,10 +234,24 @@ class Circle:
             sys.exit("The given point isn't inside of the circle.")
 
         tmp = Line(self.center, middlePoint).length()
-        chordLen = math.sqrt((self.radius)**2 - tmp**2)
+        chordLen = math.sqrt(abs((self.radius)**2 - tmp**2)) # half of the len
+
+
+
+        # du code degueu
+        a = self.randomPointFromPerimeter()
+        while(round(Line(a, middlePoint).length()) != round(chordLen)):
+            a = self.randomPointFromPerimeter()
+            mise_a_jour()
+
+        b = a.symetric(middlePoint)
+
+        chord = Line(a, b)
+
+
 
         # circle equation formula
-        (self.radius)**2 = (x - self.center.x)**2 + (y - self.center.y)**2
+        #(self.radius)**2 = (x - self.center.x)**2 + (y - self.center.y)**2
 
         print("> Chord found. Returning object.")
         return chord
@@ -326,7 +347,7 @@ def upperLeftPoint(points):
 def geometryTest():
     random.seed(time.time()) # initialising random seed
 
-    # initialising objects
+    # initializing objects
     A = Point(windowWidth/2, windowHeight/2, "A")
     print(A)
     B = Point(4, 6, "B")
@@ -336,34 +357,47 @@ def geometryTest():
     AB = Line(A, B)
     print(AB)
 
-    radius = 400
+    radius = 200
     circle = Circle(A, radius, "C")
     print(circle)
 
-    #equi = circle.equilateralTriangle()
+    equi = circle.equilateralTriangle()
     #print(equi)
 
     # display
     cree_fenetre(windowWidth, windowHeight)
-    A.draw()
-    B.draw()
-    C.draw()
+    # A.draw()
+    # B.draw()
+    # C.draw()
     circle.draw()
-    #equi.draw()
+    equi.draw()
 
-    n = 10 #number of chords in the circle
+    n = 1000 #number of chords in the circle
     chordList        = []
     randomPointsList = []
 
-    print("Generating chords, please wait...")
-    for i in range (n):
-        chordList.append(circle.randomChord_3())
-        chordList[i].draw("light blue")
+    success = 0 # number of chords that are > to equi side length
 
-    circle.draw()
     A.draw()
 
+    mise_a_jour()
 
+
+    print("Generating chords, please wait...")
+
+    for i in range (n):
+        chordList.append(circle.randomChord_1())
+        currentChord = chordList[i]
+        if(currentChord.length() > equi.sideLen()):
+            currentChord.draw("sky blue")
+            success += 1
+        else:
+            currentChord.draw("orange")
+
+    A.draw()
+    circle.draw()
+
+    print("p =", success/n)
     print("END.")
     attend_ev()
     ferme_fenetre()

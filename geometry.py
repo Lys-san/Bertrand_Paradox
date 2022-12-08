@@ -167,6 +167,12 @@ class Circle:
                             self.center.y - self.radius, self.center.y + self.radius)
         return p
 
+    def randomRadius(self):
+        return Line(self.center, self.randomPointFromPerimeter())
+
+    def verticalRadius(self):
+        point = Point(self.center.x, self.center.y + self.radius)
+        return Line(self.center, point)
 
     def equilateralTriangle(self, startPoint = 0):
         """
@@ -208,10 +214,16 @@ class Circle:
         Returns a chord genereted with the second method (cf wikipedia).
         """
         # random radius
-        tmp = Line(self.center, self.randomPointFromPerimeter())
+        tmp = self.randomRadius()
+        tmp.draw("yellow")
 
         # random point from the radius
         p = tmp.randomPoint()
+
+        p.draw()
+        mise_a_jour()
+
+
 
         return self.chordOfMiddle(p)
 
@@ -226,26 +238,57 @@ class Circle:
 
     def chordOfMiddle(self, middlePoint):
         """
-        Returns the chord of a given middle, which must be a Point.
+        Returns the chord of a given middle point, which must be a Point.
         """
 
-        print(">>> Searching chord based of given middle point...")
+        #print(">>> Searching chord based of given middle point...")
         if(not self.contains(middlePoint)):
             sys.exit("The given point isn't inside of the circle.")
 
-        tmp = Line(self.center, middlePoint).length()
-        chordLen = math.sqrt(abs((self.radius)**2 - tmp**2)) # half of the len
+
+        tmpLine = Line(self.center, middlePoint)
+        radius = self.verticalRadius()
+
+        radius.draw("green")
+
+        s1 = tmpLine.slope() # the problem is in the slope calculation
+        s2 = radius.slope()
+
+        print(tmpLine.a, tmpLine.b)
+        print("slopes : ", s1, s2)
+
+
+        # finding theta angle
+        tanTheta = (s1 - s2)/(1 + s1*s2)
+        print("tanTheta :", tanTheta)
+        theta = math.atan(tanTheta)
+        print("theta :", math.degrees(theta))
+
+
+        theta = 90 - math.degrees(theta) # this line is ok do not touch
+
+        tmp = Point(radius.b.x + self.radius*math.cos(math.radians(theta)), radius.b.y + self.radius*math.sin(math.radians(theta)), "tmp")
+        tmp.draw()
 
 
 
-        # du code degueu
-        a = self.randomPointFromPerimeter()
-        while(round(Line(a, middlePoint).length()) != round(chordLen)):
-            a = self.randomPointFromPerimeter()
-            mise_a_jour()
 
-        b = a.symetric(middlePoint)
 
+        # tmp = Line(self.center, middlePoint).length()
+        # chordLen = math.sqrt(abs((self.radius)**2 - tmp**2)) # half of the len
+        #
+        #
+        #
+        # # du code degueu
+        # a = self.randomPointFromPerimeter()
+        # while(round(Line(a, middlePoint).length()) != round(chordLen)):
+        #     a = self.randomPointFromPerimeter()
+        #     mise_a_jour()
+        #
+        # b = a.symetric(middlePoint)
+
+        a = self.center
+        b = tmp
         chord = Line(a, b)
 
 
@@ -253,7 +296,7 @@ class Circle:
         # circle equation formula
         #(self.radius)**2 = (x - self.center.x)**2 + (y - self.center.y)**2
 
-        print("> Chord found. Returning object.")
+        #print("> Chord found. Returning object.")
         return chord
 
 
@@ -263,8 +306,12 @@ class Line:
     objects.
     """
     def __init__(self, a, b, name = 0):
-        self.a = a  # first point
-        self.b = b  # second point
+        if(a.x < b.x):
+            self.a = a
+            self.b = b
+        else:
+            self.a = b
+            self.b = a
         self.name = name if name else a.name + b.name
 
     def __str__(self):
@@ -316,6 +363,14 @@ class Line:
         x = random.randint(x_min, x_max)
         return Point(x, a*x + b)
 
+    def slope(self):
+        """
+        Returns the slope of the Line.
+        """
+        if(self.a.x == self.b.x):
+            return 2**10 # infty
+        return (self.b.y - self.a.y)/(self.b.x - self.a.x)
+
 
 ### functions
 
@@ -340,6 +395,7 @@ def upperLeftPoint(points):
             ul = points[i]
 
     return ul
+    print("p =", success/n)
 
 
 ### tests
@@ -357,7 +413,7 @@ def geometryTest():
     AB = Line(A, B)
     print(AB)
 
-    radius = 200
+    radius = 100
     circle = Circle(A, radius, "C")
     print(circle)
 
@@ -372,7 +428,7 @@ def geometryTest():
     circle.draw()
     equi.draw()
 
-    n = 1000 #number of chords in the circle
+    n = 1 #number of chords in the circle
     chordList        = []
     randomPointsList = []
 
@@ -386,18 +442,19 @@ def geometryTest():
     print("Generating chords, please wait...")
 
     for i in range (n):
-        chordList.append(circle.randomChord_1())
+        chordList.append(circle.randomChord_2())
         currentChord = chordList[i]
         if(currentChord.length() > equi.sideLen()):
             currentChord.draw("sky blue")
             success += 1
         else:
             currentChord.draw("orange")
+        print("p =", success/(i + 1))
+
 
     A.draw()
     circle.draw()
 
-    print("p =", success/n)
     print("END.")
     attend_ev()
     ferme_fenetre()

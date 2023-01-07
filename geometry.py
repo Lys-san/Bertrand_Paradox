@@ -209,21 +209,19 @@ class Circle:
         mise_a_jour()
         return chord
 
-    def randomChord_2(self):
+    def randomChord_2(self, drawTmpLine = False):
         """
         Returns a chord genereted with the second method (cf wikipedia).
         """
         # random radius
         tmp = self.randomRadius()
-        tmp.draw("yellow")
-
         # random point from the radius
         p = tmp.randomPoint()
 
-        p.draw()
-        mise_a_jour()
-
-
+        if(drawTmpLine):
+            tmp.draw("gray90")
+            p.draw()
+            mise_a_jour()
 
         return self.chordOfMiddle(p)
 
@@ -235,13 +233,25 @@ class Circle:
         p = self.randomPointFromArea()
         return self.chordOfMiddle(p)
 
+    def chordFrom(self, point, slope):
+        """
+        Returns a chord crossing a given point and having a given slope.
+        """
+        x, y = point.x, point.y
+        a = Point(x, y)
+        while(self.contains(a)):
+            a.x += 1
+            a.y = point.y + round(slope*(a.x - point.x))
+        b = a.symetric(point)
+
+        return Line(a, b)
+
 
     def chordOfMiddle(self, middlePoint):
         """
         Returns the chord of a given middle point, which must be a Point.
         """
 
-        #print(">>> Searching chord based of given middle point...")
         if(not self.contains(middlePoint)):
             sys.exit("The given point isn't inside of the circle.")
 
@@ -249,55 +259,27 @@ class Circle:
         tmpLine = Line(self.center, middlePoint)
         radius = self.verticalRadius()
 
-        radius.draw("green")
-
-        s1 = tmpLine.slope() # the problem is in the slope calculation
+        s1 = tmpLine.slope()
         s2 = radius.slope()
 
-        print(tmpLine.a, tmpLine.b)
-        print("slopes : ", s1, s2)
-
-
-        # finding theta angle
+        # finding theta angle between tmpLine and vertical axis
         tanTheta = (s1 - s2)/(1 + s1*s2)
-        print("tanTheta :", tanTheta)
         theta = math.atan(tanTheta)
-        print("theta :", math.degrees(theta))
 
+        theta = math.degrees(theta)
 
-        theta = 90 - math.degrees(theta) # this line is ok do not touch
-
+        # tmp is perpandicular to tmpLine
         tmp = Point(radius.b.x + self.radius*math.cos(math.radians(theta)), radius.b.y + self.radius*math.sin(math.radians(theta)), "tmp")
-        tmp.draw()
-
-
-
-
-
-        # tmp = Line(self.center, middlePoint).length()
-        # chordLen = math.sqrt(abs((self.radius)**2 - tmp**2)) # half of the len
-        #
-        #
-        #
-        # # du code degueu
-        # a = self.randomPointFromPerimeter()
-        # while(round(Line(a, middlePoint).length()) != round(chordLen)):
-        #     a = self.randomPointFromPerimeter()
-        #     mise_a_jour()
-        #
-        # b = a.symetric(middlePoint)
 
         a = self.center
         b = tmp
-        chord = Line(a, b)
+        lastTmp = Line(a, b)
 
+        s3 = lastTmp.slope()
+        chord = self.chordFrom(middlePoint, s3)
 
-
-        # circle equation formula
-        #(self.radius)**2 = (x - self.center.x)**2 + (y - self.center.y)**2
-
-        #print("> Chord found. Returning object.")
         return chord
+
 
 
 class Line:
@@ -368,7 +350,7 @@ class Line:
         Returns the slope of the Line.
         """
         if(self.a.x == self.b.x):
-            return 2**10 # infty
+            return 2**1000 # infty
         return (self.b.y - self.a.y)/(self.b.x - self.a.x)
 
 
@@ -413,7 +395,7 @@ def geometryTest():
     AB = Line(A, B)
     print(AB)
 
-    radius = 100
+    radius = 200
     circle = Circle(A, radius, "C")
     print(circle)
 
@@ -428,7 +410,14 @@ def geometryTest():
     circle.draw()
     equi.draw()
 
-    n = 1 #number of chords in the circle
+    # tests starts here
+    # test = circle.chordFrom(circle.center, 0)
+    # test.draw("red")
+    # test2 = circle.chordFrom(circle.center, 9990)
+    # test2.draw("blue")
+    # remove when finished
+
+    n = 60 #number of chords in the circle
     chordList        = []
     randomPointsList = []
 

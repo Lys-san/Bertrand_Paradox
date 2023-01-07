@@ -339,7 +339,7 @@ class Line:
         if(self.b.x == self.a.x):
             y_min = self.a.y if self.a.y < self.b.y else self.b.y
             y_max = self.a.y if self.a.y > self.b.y else self.b.y
-            return Point(self.x, random.randint(y_min, y_max))
+            return Point(self.b.x, random.randint(y_min, y_max))
 
         # constructing the linear equation
         a = (self.b.y - self.a.y)/(self.b.x - self.a.x)
@@ -402,7 +402,7 @@ def geometryTest():
     AB = Line(A, B)
     print(AB)
 
-    radius = 200
+    radius = 300
     circle = Circle(A, radius, "C")
     print(circle)
 

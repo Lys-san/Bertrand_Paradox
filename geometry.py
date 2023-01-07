@@ -233,6 +233,7 @@ class Circle:
         p = self.randomPointFromArea()
         return self.chordOfMiddle(p)
 
+
     def chordFrom(self, point, slope):
         """
         Returns a chord crossing a given point and having a given slope.
@@ -334,6 +335,12 @@ class Line:
         """
         Returns a randomly generated Point on the given Line.
         """
+        # if line is vertical
+        if(self.b.x == self.a.x):
+            y_min = self.a.y if self.a.y < self.b.y else self.b.y
+            y_max = self.a.y if self.a.y > self.b.y else self.b.y
+            return Point(self.x, random.randint(y_min, y_max))
+
         # constructing the linear equation
         a = (self.b.y - self.a.y)/(self.b.x - self.a.x)
         b = self.a.y - a * self.a.x

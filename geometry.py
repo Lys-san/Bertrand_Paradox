@@ -172,12 +172,11 @@ class Circle:
         point = Point(self.center.x, self.center.y + self.radius)
         return Line(self.center, point)
 
-    def equilateralTriangle(self, startPoint = 0):
+    def equilateralTriangle(self):
         """
         Returns an equilateral triangle inscribed in the current circle.
         """
-        a = startPoint if startPoint else Point(self.center.x + self.radius, self.center.y) #ref point
-
+        a = Point(self.center.x + self.radius, self.center.y)
         b = Point(self.center.x + math.cos(math.radians(120))*self.radius, \
          self.center.y + math.sin(math.radians(120))*self.radius)
         c = Point(self.center.x + math.cos(math.radians(-120))*self.radius, \

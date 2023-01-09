@@ -18,6 +18,7 @@ from upemtk import * #credits : Arnaud Carayol, Cyril Nicaud, Carine Pivoteau
 
 windowWidth  = 1000
 windowHeight = 1000
+INFTY        = 2**1000
 
 ### class
 
@@ -146,13 +147,10 @@ class Circle:
         """
         Returns a randomly generated point from the border of the Circle.
         """
-        p = randomPoint(self.center.x - self.radius, self.center.x + self.radius, \
-                        self.center.y - self.radius, self.center.y + self.radius)
 
-        while not self.perimeterContains(p):
-            p = randomPoint(self.center.x - self.radius, self.center.x + self.radius, \
-                            self.center.y - self.radius, self.center.y + self.radius)
-        return p
+        theta = math.radians(random.randint(0, 360))
+        return Point(round(self.center.x + self.radius*math.cos(theta)), \
+            round(self.center.y + self.radius*math.sin(theta)))
 
 
     def randomPointFromArea(self):
@@ -177,23 +175,13 @@ class Circle:
     def equilateralTriangle(self, startPoint = 0):
         """
         Returns an equilateral triangle inscribed in the current circle.
-        If no start point is given, it will be randomly generated.
         """
-        a = startPoint if startPoint else self.randomPointFromPerimeter() #ref point
-        tmp = a.symetric(self.center) # creating ref point symetric
+        a = startPoint if startPoint else Point(self.center.x + self.radius, self.center.y) #ref point
 
-        # cet algo fait le taff mais est horrible (la complexité ahhhh, plus de
-        # 5 secondes avant d'avoir le résultat)
-        # A REVOIR PLUS TARD
-
-        # creating a random point and hoping that it's the edge from the triangle
-        b = self.randomPointFromPerimeter()
-        while(round(Line(tmp, b).length()) != self.radius):
-            b = self.randomPointFromPerimeter()
-
-        c = self.randomPointFromPerimeter()
-        while(round(Line(tmp, c).length()) != self.radius or c.equals(b)):
-            c = self.randomPointFromPerimeter()
+        b = Point(self.center.x + math.cos(math.radians(120))*self.radius, \
+         self.center.y + math.sin(math.radians(120))*self.radius)
+        c = Point(self.center.x + math.cos(math.radians(-120))*self.radius, \
+         self.center.y + math.sin(math.radians(-120))*self.radius)
 
         return Triangle(a, b, c)
 
@@ -357,7 +345,7 @@ class Line:
         Returns the slope of the Line.
         """
         if(self.a.x == self.b.x):
-            return 2**1000 # infty
+            return INFTY
         return (self.b.y - self.a.y)/(self.b.x - self.a.x)
 
 
@@ -433,7 +421,6 @@ def geometryTest():
     A.draw()
 
     mise_a_jour()
-
 
     print("Generating chords, please wait...")
 
